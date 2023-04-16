@@ -1,104 +1,178 @@
-import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ISOLATION_LEVELS } from "@/types";
+import { ISOLATION_LEVELS, Movie } from "@/types";
+import Layout from "@/components/Layout";
 
 const inter = Inter({ subsets: ["latin"] });
 
-async function getMovie(name: string) {
+async function getMovies(transactionLevel: ISOLATION_LEVELS): Promise<Movie[]> {
   console.log("Getting movie");
-  const { data } = await axios.get(`/api/movie?name=${name}`);
+  const { data } = await axios.get(
+    `/api/movies?transactionLevel=${transactionLevel}`
+  );
+  return data;
+}
+
+async function searchMovies(
+  transactionLevel: ISOLATION_LEVELS,
+  query?: string
+): Promise<Movie[]> {
+  console.log("Getting movie");
+  const { data } = await axios.get(
+    `/api/movies/search?transactionLevel=${transactionLevel}&search=${query}`
+  );
   return data;
 }
 
 export default function Home() {
-  const [node1, setNode1] = useState(null);
-  const [node2, setNode2] = useState(null);
   const [transactionLevel, setTransactionLevel] =
     useState<ISOLATION_LEVELS>("SERIALIZABLE");
-  const [movieId, setMovieId] = useState("");
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const handleSubmit = async (event: any) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
-    const [n1, n2] = await Promise.all([getMovie(movieId), getMovie(movieId)]);
-    setNode1(n1);
-    setNode2(n2);
+    const movies = await searchMovies(transactionLevel, search);
+    setMovies(movies);
     setLoading(false);
   };
 
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const movies = await getMovies(transactionLevel);
+      setMovies(movies);
+      setLoading(false);
+    })();
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center gap-10">
-      <h1 className="text-2xl">Case 1: Read both</h1>
-      <div>
-        <label htmlFor="name" className="block py-3 text-gray-500">
-          Movie id
-        </label>
-        <div className="flex items-center p-2 border rounded-md">
-          <input
-            onChange={(event) => {
-              setMovieId(event.target.value);
-            }}
-            type="id"
-            id="id"
-            className="w-full p-1 ml-3 text-gray-500 outline-none bg-transparent"
-          />
+    <Layout>
+      <div className="flex flex-col items-center justify-center gap-10">
+        <h1 className="text-2xl">View movies</h1>
+        <div>
+          <h2 className="text-lg">
+            Current Transaction Level: {transactionLevel}
+          </h2>
+          <div className="relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute top-0 bottom-0 w-6 h-6 my-auto text-gray-400 right-2.5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <select
+              onChange={(event) => {
+                setTransactionLevel(event.target.value as ISOLATION_LEVELS);
+              }}
+              defaultValue={"SERIALIZABLE"}
+              className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
+            >
+              <option value="READ UNCOMMITTED">READ UNCOMMITTED</option>
+              <option value="READ COMMITTED">READ COMMITTED</option>
+              <option value="REPEATABLE READ">REPEATABLE READ</option>
+              <option value="SERIALIZABLE">SERIALIZABLE</option>
+            </select>
+          </div>
         </div>
-      </div>
-      <div>
-        <h2 className="text-lg">
-          Current Transaction Level: {transactionLevel}
-        </h2>
-        <div className="relative">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute top-0 bottom-0 w-6 h-6 my-auto text-gray-400 right-2.5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-              clipRule="evenodd"
+        <form onSubmit={handleSubmit} className="max-w-md px-4 mx-auto mt-12">
+          <div className="relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="absolute top-0 bottom-0 w-6 h-6 my-auto text-gray-400 left-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full py-3 pl-12 pr-4 text-gray-500 border rounded-md outline-none bg-gray-50 focus:bg-white focus:border-indigo-600"
+              onChange={(e) => setSearch(e.target.value)}
             />
-          </svg>
-          <select
-            onChange={(event) => {
-              setTransactionLevel(event.target.value as ISOLATION_LEVELS);
-            }}
-            defaultValue={"SERIALIZABLE"}
-            className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
-          >
-            <option value="READ UNCOMMITTED">READ UNCOMMITTED</option>
-            <option value="READ COMMITTED">READ COMMITTED</option>
-            <option value="REPEATABLE READ">REPEATABLE READ</option>
-            <option value="SERIALIZABLE">SERIALIZABLE</option>
-          </select>
+          </div>
+        </form>
+
+        <div className="flex gap-5 justify-center w-full">
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <>
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y-2 divide-gray-200 text-sm">
+                  <thead className="ltr:text-left rtl:text-right">
+                    <tr>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Name
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Year
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Rank
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Actor 1
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Actor 2
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Actor 3
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-gray-200">
+                    {loading ? (
+                      <tr>Loading...</tr>
+                    ) : (
+                      movies?.map((item, index) => (
+                        <tr key={index}>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.name}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.year}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.rank}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.actor1_first_name} {item.actor1_last_name}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.actor2_first_name} {item.actor2_last_name}
+                          </td>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.actor3_first_name} {item.actor3_last_name}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </div>
-      <div>
-        <button className="bg-blue-700 text-white p-4 " onClick={handleSubmit}>
-          Read
-        </button>
-      </div>
-      <div className="flex gap-5 justify-center w-full">
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <>
-            <div>
-              <h2>Node 1</h2>
-              {node1}
-            </div>
-            <div>
-              <h2>Node 2</h2>
-              {node2}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+    </Layout>
   );
 }
