@@ -93,6 +93,9 @@ export default function Home() {
                   <thead className="ltr:text-left rtl:text-right">
                     <tr>
                       <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                        Id
+                      </th>
+                      <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
                         Name
                       </th>
                       <th className="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
@@ -119,6 +122,9 @@ export default function Home() {
                     ) : (
                       movies?.map((item, index) => (
                         <tr key={index}>
+                          <td className="whitespace-nowrap px-4 py-2">
+                            {item.id}
+                          </td>
                           <td className="whitespace-nowrap px-4 py-2">
                             {item.name}
                           </td>
