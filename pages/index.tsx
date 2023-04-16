@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { ISOLATION_LEVELS, Movie } from "@/types";
 import Layout from "@/components/Layout";
+import TransactionLevel from "@/components/TransactionLevel";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +28,7 @@ async function searchMovies(
 
 export default function Home() {
   const [transactionLevel, setTransactionLevel] =
-    useState<ISOLATION_LEVELS>("SERIALIZABLE");
+    useState<ISOLATION_LEVELS>("REPEATABLE READ");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -53,37 +54,10 @@ export default function Home() {
     <Layout>
       <div className="flex flex-col items-center justify-center gap-10">
         <h1 className="text-2xl">View movies</h1>
-        <div>
-          <h2 className="text-lg">
-            Current Transaction Level: {transactionLevel}
-          </h2>
-          <div className="relative">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute top-0 bottom-0 w-6 h-6 my-auto text-gray-400 right-2.5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <select
-              onChange={(event) => {
-                setTransactionLevel(event.target.value as ISOLATION_LEVELS);
-              }}
-              defaultValue={"SERIALIZABLE"}
-              className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
-            >
-              <option value="READ UNCOMMITTED">READ UNCOMMITTED</option>
-              <option value="READ COMMITTED">READ COMMITTED</option>
-              <option value="REPEATABLE READ">REPEATABLE READ</option>
-              <option value="SERIALIZABLE">SERIALIZABLE</option>
-            </select>
-          </div>
-        </div>
+        <TransactionLevel
+          transactionLevel={transactionLevel}
+          setTransactionLevel={setTransactionLevel}
+        />
         <form onSubmit={handleSubmit} className="max-w-md px-4 mx-auto mt-12">
           <div className="relative">
             <svg

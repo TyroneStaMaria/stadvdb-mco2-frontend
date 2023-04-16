@@ -15,6 +15,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         console.log(err);
       }
       break;
+    case "POST":
+      try {
+        const { data } = await axios.post(
+          `http://localhost:3000/api/movies?transactionLevel=${req.query.transactionLevel}`,
+          req.body
+        );
+        res.status(200).send(data);
+      } catch (err) {
+        console.log(err);
+      }
     default:
       res.status(405).send("Method not allowed");
       break;
