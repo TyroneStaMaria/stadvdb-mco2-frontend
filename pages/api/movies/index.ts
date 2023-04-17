@@ -22,8 +22,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           req.body
         );
         res.status(200).send(data);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err);
+        res.status(500).send(err.data);
       }
       break;
     case "PUT":

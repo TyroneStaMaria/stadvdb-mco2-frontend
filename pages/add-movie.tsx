@@ -42,6 +42,7 @@ const AddMovie = () => {
       setFormData(DEFAULT_DATA);
       setSuccess(true);
     } catch (err) {
+      console.log(err)
       setError(true);
     }
   };

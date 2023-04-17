@@ -6,13 +6,14 @@ export type ISOLATION_LEVELS =
 
 export type Movie = {
   id?: string;
-  name: string;
-  year: number;
-  rank: number;
-  actor1_first_name: string;
-  actor1_last_name: string;
-  actor2_first_name: string;
-  actor2_last_name: string;
-  actor3_first_name: string;
-  actor3_last_name: string;
+  name?: string;
+  year?: number;
+  rank?: number;
+  actor1_first_name?: string;
+  actor1_last_name?: string;
+  actor2_first_name?: string;
+  actor2_last_name?: string;
+  actor3_first_name?: string;
+  actor3_last_name?: string;
+  num_movies?: number;
 };
